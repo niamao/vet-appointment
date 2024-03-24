@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Urbanist } from "next/font/google";
 import "./globals.css";
+import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header"
+import { Container, Row, Col } from 'react-bootstrap';
 
-const inter = Inter({ subsets: ["latin"] });
+const urbanist = Urbanist({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,7 +19,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${urbanist.className} overflow-x-hidden`}>
+        <Container fluid className="px-0">
+          <Row>
+            <Col xs="auto" className="px-0">
+              <Sidebar />
+            </Col>
+            <Col className="ps-0 py-2">
+              <Header />
+              {children}
+            </Col>
+          </Row>
+        </Container>
+      </body>
     </html>
   );
 }
