@@ -12,6 +12,7 @@
     "@fullcalendar/bootstrap5": "^6.1.11",
     "@fullcalendar/core": "^6.1.11",
     "@fullcalendar/daygrid": "^6.1.11",
+    "@fullcalendar/react": "^6.1.11",
     "@fullcalendar/timegrid": "^6.1.11",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",

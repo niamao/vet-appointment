@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useStore } from '../../../store';
 import Image from "next/image";
 import Card from '@/app/appointments/components/Card';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 interface Appointment {
   id: number;
@@ -38,7 +40,8 @@ interface Veterinary {
 const AppointmentSection = () => {
   const { eventId, appointments, veterinaries, setResched, setModal, setAppointments, setAppointmentCard } = useStore();
   const [appointment, setAppointment] = useState<Appointment | undefined>(undefined);
-  const [veterinary, setVeterinary] = useState<Veterinary | undefined>(undefined);
+  const [veterinary, setVeterinary]= useState<Veterinary | undefined>(undefined);
+  const [showModal, setShowModal] = useState(false);
   const open = Number(eventId) > 0;
 
   const handleResched = () => {
@@ -47,15 +50,24 @@ const AppointmentSection = () => {
   }
 
   const handleCancel = () => {
-    const confirmed = window.confirm('Are you sure you want to cancel this appointment?');
-    if (confirmed && appointment) {
-      const updatedAppointments = appointments.map(appt =>
-        appt.id === eventId ? { ...appt, status: 'cancelled' } : appt
-      );
-      setAppointments(updatedAppointments);
-      setAppointmentCard('')
-    }
-  }
+    setShowModal(true);
+  };
+
+  const handleClose = () => {
+    setShowModal(false);
+  };
+
+  const handleConfirmCancel = () => {
+    const updatedAppointments = appointments.map(appt =>
+      appt.id === eventId ? { ...appt, status: 'cancelled' } : appt
+    );
+    setAppointments(updatedAppointments);
+    setShowModal(false);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   useEffect(() => {
     if (appointments && appointments.length > 0 && eventId) {
@@ -79,6 +91,18 @@ const AppointmentSection = () => {
     <div className="d-flex flex-column border-start position-relative h-100" style={{ width: open ? '24vw' : 0,  transition: 'width 0.5s ease-out', zIndex: 30 }}>
       {appointment && veterinary && (
         <ul>
+          <Modal show={showModal} onHide={handleClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Cancellation</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              Are you sure you want to cancel this appointment?
+            </Modal.Body>
+            <Modal.Footer>
+              <button className="btn btn-outline-secondary" onClick={handleClose}>Close</button>
+              <button className="btn btn-outline-primary" onClick={handleConfirmCancel}>Confirm</button>
+            </Modal.Footer>
+          </Modal>
           <li className='px-4 py-3 border'>
             <div className='d-flex gap-3 align-items-center'>
               <Image alt="Profile Image" src={appointment.owner.image} width={80} height={80} />
@@ -178,11 +202,15 @@ const AppointmentSection = () => {
                   Reschedule Appointment
               </button>
             </p>
-            {appointment.status !== 'cancelled' && (
-              <p className="w-100 mt-3">
-                <button className="btn btn-outline-secondary w-100" onClick={handleCancel}>Cancel Appointment</button>
-              </p>
-            )}
+            <p className="w-100 mt-3">
+              <button
+                className="btn btn-outline-secondary w-100"
+                disabled={appointment.status == 'cancelled'}
+                onClick={handleCancel}
+              >
+                  {appointment.status == 'cancelled' ? 'Appointment Cancelled' : 'Cancel Appointment'}
+              </button>
+            </p>
           </li>
         </ul>
       )}

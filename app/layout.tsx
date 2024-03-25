@@ -25,7 +25,7 @@ export default function RootLayout({
             <Col xs="auto" className="px-0">
               <Sidebar />
             </Col>
-            <Col className="ps-0 py-2">
+            <Col className="ps-0">
               <Header />
               {children}
             </Col>
