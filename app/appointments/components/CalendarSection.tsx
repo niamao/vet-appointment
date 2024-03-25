@@ -197,6 +197,8 @@ const CalendarSection = () => {
               color: 'transparent',
             },
           ]}
+          height="70vh"
+          contentHeight="70vh"
           headerToolbar={false}
           allDaySlot={false}
         />

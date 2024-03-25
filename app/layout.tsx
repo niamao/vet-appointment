@@ -19,13 +19,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${urbanist.className} overflow-x-hidden`}>
-        <Container fluid className="px-0">
+      <body className={`${urbanist.className} overflow-hidden`}>
+        <Container fluid className="px-0 vh-100">
           <Row>
-            <Col xs="auto" className="px-0">
+            <Col xs="auto" className="px-0 vh-100">
               <Sidebar />
             </Col>
-            <Col className="ps-0">
+            <Col className="ps-0 vh-100">
               <Header />
               {children}
             </Col>

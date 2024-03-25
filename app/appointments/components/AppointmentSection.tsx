@@ -88,9 +88,9 @@ const AppointmentSection = () => {
   }, [appointment, veterinaries]);
 
   return (
-    <div className="d-flex flex-column border-start position-relative h-100" style={{ width: open ? '24vw' : 0,  transition: 'width 0.5s ease-out', zIndex: 30 }}>
+    <div className="d-flex flex-column border-start position-relative" style={{ width: open ? '24vw' : 0, height: '90vh', transition: 'width 0.5s ease-out', zIndex: 30 }}>
       {appointment && veterinary && (
-        <ul>
+        <ul style={{ overflowY: 'auto' }}>
           <Modal show={showModal} onHide={handleClose}>
             <Modal.Header closeButton>
               <Modal.Title>Confirm Cancellation</Modal.Title>

@@ -16,7 +16,7 @@ const Sidebar = () => {
   }
 
   return (
-    <div className="d-flex flex-column position-relative bg-black" style={{ height: pathname === '/appointments' ? '100%' : '100vh', width: open ? 240 : 120, transition: 'width 0.5s ease-out', zIndex: 30 }}>
+    <div className="d-flex flex-column position-relative bg-black" style={{ height: '100vh', width: open ? 240 : 120, transition: 'width 0.5s ease-out', zIndex: 30 }}>
       <Image
         src={`/assets/svg/toggle_${open ? 'minimize' : 'maximize'}.svg`}
         alt="Toggle Icon"
