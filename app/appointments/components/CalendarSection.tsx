@@ -27,7 +27,7 @@ const CalendarSection = () => {
       start: appointment.start,
       end: appointment.end,
       id: appointment.id.toString(),
-      className: appointment.status === 'cancelled' ? 'cancelled-event' : '',
+      status: appointment.status,
     }));
   };
 
@@ -167,11 +167,10 @@ const CalendarSection = () => {
           <p style={{ fontSize: 16, color: '#9D9C9C' }}>
             {isToday ? 'Today is' : ''} {dayOfWeek}, {calendarDate}
           </p>
-
-          <div className="btn-group mt-2" role="group" aria-label="View Options">
-            <button className="btn btn-secondary" onClick={setCurrentDateInTimeGridDay}>Day View</button>
-            <button className="btn btn-secondary" onClick={changeToDayGridMonth}>Month View</button>
-          </div>
+        </div>
+        <div className="btn-group mt-2" role="group" aria-label="View Options">
+          <button className="btn btn-secondary" onClick={setCurrentDateInTimeGridDay}>Day View</button>
+          <button className="btn btn-secondary" onClick={changeToDayGridMonth}>Month View</button>
         </div>
         <div>
           <button

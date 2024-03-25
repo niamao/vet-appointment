@@ -87,15 +87,11 @@ const Header = () => {
                     <div
                       key={appointment.id}
                       className="dropdown-item"
-                      onClick={() => {
-                        if (appointment.status !== 'cancelled') {
-                          handleOptionSelect(appointment);
-                        }
-                      }}
+                      onClick={() => handleOptionSelect(appointment)}
                       onMouseEnter={() => setHoveredSearchItem(index)}
                       onMouseLeave={() => setHoveredSearchItem(null)}
                       style={{
-                        cursor: appointment.status === 'cancelled' ? 'not-allowed' : 'pointer',
+                        cursor: 'pointer',
                         backgroundColor: hoveredSearchItem === index ? '#f3f2f0' : 'transparent', 
                       }}
                     >
