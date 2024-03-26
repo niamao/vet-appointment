@@ -19,8 +19,8 @@ export const APPOINTMENTS = [
       birthday: 'January 12, 2023',
       type: 'Dog'
     },
-    start: new Date().toISOString(), // Current date and time
-    end: new Date(new Date().getTime() + (30 * 60000)).toISOString(), // 30 minutes later
+    start: new Date(new Date().setHours(8, 0, 0, 0)).toISOString(), // 8:00 AM
+    end: new Date(new Date().setHours(9, 30, 0, 0)).toISOString(), // 9:30 AM
     status: 'active'
   },
   {
@@ -32,19 +32,19 @@ export const APPOINTMENTS = [
       image: '/assets/img/profile_pic.png',
       email: 'johndoe@gmail.com'
     },
-    service: 'Checkup',
+    service: "Brownie's Vaccination",
     veterinary_id: 2,
     pet: {
-      name: 'Max',
-      breed: 'Golden Retriever',
-      age: '2 years',
+      name: 'Brownie',
+      breed: 'French Bulldog',
+      age: '10 months',
       gender: 'Male',
-      image: '/assets/img/max_pic.png',
-      birthday: 'March 5, 2022',
+      image: '/assets/img/brownie_pic.png',
+      birthday: 'January 12, 2023',
       type: 'Dog'
     },
-    start: new Date(new Date().getTime() + (90 * 60000)).toISOString(),
-    end: new Date(new Date().getTime() + (120 * 60000)).toISOString(),
+    start: new Date(new Date().setHours(10, 30, 0, 0)).toISOString(), // 10:30 AM
+    end: new Date(new Date().setHours(11, 30, 0, 0)).toISOString(), // 11:30 AM
     status: 'active'
   },
   {
@@ -59,16 +59,16 @@ export const APPOINTMENTS = [
     service: 'Vaccination',
     veterinary_id: 3,
     pet: {
-      name: 'Bella',
+      name: 'Max',
       breed: 'Labrador Retriever',
       age: '3 years',
-      gender: 'Female',
-      image: '/assets/img/bella_pic.png',
+      gender: 'Male',
+      image: '/assets/img/max_pic.png',
       birthday: 'April 20, 2021',
       type: 'Dog'
     },
-    start: new Date(new Date().getTime() + (180 * 60000)).toISOString(), 
-    end: new Date(new Date().getTime() + (210 * 60000)).toISOString(),
+    start: new Date(new Date().setHours(13, 0, 0, 0)).toISOString(), // 1:00 PM
+    end: new Date(new Date().setHours(14, 30, 0, 0)).toISOString(), // 2:30 PM
     status: 'active'
   },
   {
@@ -91,8 +91,8 @@ export const APPOINTMENTS = [
       birthday: 'June 15, 2023',
       type: 'Cat'
     },
-    start: new Date(new Date().getTime() + (240 * 60000)).toISOString(), 
-    end: new Date(new Date().getTime() + (270 * 60000)).toISOString(),
+    start: new Date(new Date().setHours(15, 30, 0, 0)).toISOString(), // 3:30 PM
+    end: new Date(new Date().setHours(16, 30, 0, 0)).toISOString(), // 4:30 PM
     status: 'active'
   },
   {
@@ -115,8 +115,8 @@ export const APPOINTMENTS = [
       birthday: 'July 10, 2022',
       type: 'Cat'
     },
-    start: new Date(new Date().getTime() + (300 * 60000)).toISOString(), 
-    end: new Date(new Date().getTime() + (330 * 60000)).toISOString(),
+    start: new Date(new Date().setHours(17, 0, 0, 0)).toISOString(), // 5:00 PM
+    end: new Date(new Date().setHours(17, 30, 0, 0)).toISOString(), // 5:30 PM
     status: 'active'
   }
 ];

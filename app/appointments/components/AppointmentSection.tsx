@@ -5,37 +5,7 @@ import { useStore } from '../../../store';
 import Image from "next/image";
 import Card from '@/app/appointments/components/Card';
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-
-interface Appointment {
-  id: number;
-  owner: {
-    image: string;
-    name: string;
-    email: string;
-    contact_number: string;
-    address: string;
-  };
-  veterinary_id: number;
-  pet: {
-    name: string;
-    type: string;
-    breed: string;
-    gender: string;
-    age: string;
-    birthday: string;
-    image: string;
-  };
-}
-
-interface Veterinary {
-  id: number;
-  building: string;
-  address: string;
-  email: string;
-  contact_number: string;
-  image: string;
-}
+import { Appointment, Veterinary } from '../../../types';
 
 const AppointmentSection = () => {
   const { eventId, appointments, veterinaries, setResched, setModal, setAppointments, setAppointmentCard } = useStore();
@@ -58,7 +28,7 @@ const AppointmentSection = () => {
   };
 
   const handleConfirmCancel = () => {
-    const updatedAppointments = appointments.map(appt =>
+    const updatedAppointments = appointments.map((appt: Appointment) =>
       appt.id === eventId ? { ...appt, status: 'cancelled' } : appt
     );
     setAppointments(updatedAppointments);

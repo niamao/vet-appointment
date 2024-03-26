@@ -4,32 +4,8 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { Modal, Form } from 'react-bootstrap';
 import { useStore } from '../../../store';
 import Card from '@/app/appointments/components/Card';
-
-interface Veterinary {
-  id: number;
-  veterinary_name: string;
-  address: string;
-  building: string;
-  contact_number: string;
-  image: string;
-  email: string;
-}
-
-interface FormData {
-  id: number,
-  veterinaryId: string;
-  service: string;
-  petName: string;
-  breed: string;
-  type: string;
-  ageValue: string; 
-  ageUnit: string; 
-  gender: string;
-  ownerName: string;
-  appointmentDate: string;
-  appointmentStartTime: string;
-  appointmentEndTime: string;
-}
+import { calculateDuration, sanitizeData } from '../../../utils';
+import { FormData, Veterinary } from '../../../types';
 
 const AppointmentModal = () => {
   const { open, setModal, veterinaries, appointments, setAppointments, setAppointmentCard, reschedId, setResched } = useStore();
@@ -44,16 +20,30 @@ const AppointmentModal = () => {
     ageUnit: 'years', 
     gender: '',
     ownerName: '',
-    appointmentDate: '',
-    appointmentStartTime: '',
-    appointmentEndTime: ''
+    appointmentDateTime: '',
+    duration: '30'
   });
   const [disableSave, setDisableSave] = useState(false)
 
   useEffect(() => {
+    if (formData.veterinaryId.length || Number(formData.veterinaryId) > 0) {
+      setDisableSave(false);
+    } else {
+      setDisableSave(true);
+    }
+  }, []);
+
+  useEffect(() => {
     if (reschedId !== null) {
-      const reschedAppointment = appointments.find(appointment => appointment.id === reschedId);
+      const reschedAppointment = appointments.find((appointment: any) => Number(appointment.id) === Number(reschedId));
       if (reschedAppointment) {
+        const startTime = new Date(reschedAppointment.start);
+        const year = startTime.getFullYear();
+        const month = String(startTime.getMonth() + 1).padStart(2, '0');
+        const day = String(startTime.getDate()).padStart(2, '0');
+        const hours = String(startTime.getHours()).padStart(2, '0');
+        const minutes = String(startTime.getMinutes()).padStart(2, '0');
+        const formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
         setFormData({
           ...reschedAppointment,
           id: reschedAppointment.id.toString(),
@@ -65,79 +55,84 @@ const AppointmentModal = () => {
           ageUnit: reschedAppointment.pet.age.split(' ')[1],
           ownerName: reschedAppointment.owner.name,
           veterinaryId: reschedAppointment.veterinary_id.toString(),
-          appointmentDate: reschedAppointment.start.split('T')[0],
-          appointmentStartTime: reschedAppointment.start.split('T')[1].slice(0, 5),
-          appointmentEndTime: reschedAppointment.end.split('T')[1].slice(0, 5) 
+          appointmentDateTime: formattedDateTime,
+          duration: calculateDuration(reschedAppointment.start, reschedAppointment.end)
         });
       }
     }
   }, [reschedId, appointments]);
 
-  const sanitizeData = (data: FormData) => {
-    const currentDate = new Date();
-    const ageValue = parseInt(data.ageValue);
-    let birthday: Date;
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    const selectedHours = parseInt(value.substring(11, 13));
   
-    if (data.ageUnit === 'years') {
-      birthday = new Date(currentDate.getFullYear() - ageValue, currentDate.getMonth(), currentDate.getDate());
-    } else if (data.ageUnit === 'months') {
-      birthday = new Date(currentDate.getFullYear(), currentDate.getMonth() - ageValue, currentDate.getDate());
-    } else if (data.ageUnit === 'weeks') {
-      birthday = new Date(currentDate.getTime() - (ageValue * 7 * 24 * 60 * 60 * 1000));
-    } else if (data.ageUnit === 'days') {
-      birthday = new Date(currentDate.getTime() - (ageValue * 24 * 60 * 60 * 1000));
-    } else {
-      birthday = currentDate;
+    const endTime = new Date(value);
+    endTime.setMinutes(endTime.getMinutes() + parseInt(formData.duration));
+    const endHours = endTime.getHours();
+  
+    // Check if the selected time is within the allowed range (7 AM to 7 PM)
+    if (selectedHours < 7 || selectedHours >= 19 || endHours >= 19) {
+      alert('Appointment hours are limited to between 7 AM and 7 PM.');
+      return;
+    }
+  
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  
+    setDisableSave(false);
+  };
+
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = event.target;
+
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+
+    setDisableSave(false);
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (
+      !formData.veterinaryId ||
+      !formData.service ||
+      !formData.petName ||
+      !formData.breed ||
+      !formData.ageValue ||
+      !formData.ageUnit ||
+      !formData.gender ||
+      !formData.ownerName ||
+      !formData.appointmentDateTime ||
+      !formData.duration
+    ) {
+      alert('Please fill in all fields.');
+      setDisableSave(true);
+      return;
     }
 
-    const petImageData = localStorage.getItem('petImage') || '';
+    const newAppointment = sanitizeData(formData, appointments, reschedId);
+    if (reschedId !== null) {
+      // If it's an update, replace the existing appointment with the updated one
+      const updatedAppointments = appointments.map((appointment: any) =>
+        Number(appointment.id) === Number(formData.id) ? newAppointment : appointment
+      );
 
-    const petImg = petImageData || '/assets/img/default_pet_image.png';
-  
-    const age = `${data.ageValue} ${data.ageUnit}`;
-  
-    const appointmentDate = new Date(data.appointmentDate);
-    const [startHour, startMinute] = data.appointmentStartTime.split(':').map(Number);
-    const [endHour, endMinute] = data.appointmentEndTime.split(':').map(Number);
-  
-    appointmentDate.setUTCHours(startHour, startMinute);
-    const start = appointmentDate.toISOString();
-  
-    appointmentDate.setUTCHours(endHour, endMinute);
-    const end = appointmentDate.toISOString();
-  
-    // Log UTC conversion of appointment datetime
-    console.log('UTC Conversion Appointment Start:', start);
-    console.log('UTC Conversion Appointment End:', end);
-  
-    const newAppointment = {
-      id: reschedId !== null ? data.id : appointments.length + 1,
-      owner: {
-        name: data.ownerName,
+      setAppointments(updatedAppointments);
+    } else {
+      // If it's a new appointment, add it to the list
+      setAppointments([...appointments, newAppointment]);
+    }
+    setAppointmentCard(newAppointment.id);
 
-        // defaults
-        contact_number: '+01 234 567 8910', 
-        address: '1st Avenue, Golden Street, Springville Village, San Diego, California', 
-        image: '/assets/img/profile_pic.png', 
-        email: 'chrissielee@gmail.com'
-      },
-      service: data.service,
-      veterinary_id: parseInt(data.veterinaryId),
-      pet: {
-        name: data.petName,
-        breed: data.breed,
-        age: age,
-        gender: data.gender,
-        birthday: birthday.toDateString(),
-        image: petImg,
-        type: data.type
-      },
-      start: start,
-      end: end,
-      status: 'active'
-    };
-  
-    return newAppointment;
+    console.log("UTC Conversion of Appointment Date and Time:", new Date(formData.appointmentDateTime).toUTCString());
+
+    handleClose();
   };
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -165,55 +160,13 @@ const AppointmentModal = () => {
       ageUnit: 'years',
       gender: '',
       ownerName: '',
-      appointmentDate: '',
-      appointmentStartTime: '',
-      appointmentEndTime: ''
+      appointmentDateTime: '',
+      duration: '30'
     });
-    setResched(null)
+    setResched(null);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    
-    if (name === 'appointmentEndTime' && formData.appointmentStartTime.length && value < formData.appointmentStartTime) {
-      alert('End time cannot be earlier than start time');
-      setDisableSave(true);
-
-      return 
-    } 
-
-    if (name === 'appointmentStartTime' && formData.appointmentEndTime.length && value > formData.appointmentEndTime) {
-      alert('Start time cannot be later than end time');
-      setDisableSave(true);
-      return  
-    }
-
-    setDisableSave(false);
-  };
-
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const newAppointment = sanitizeData(formData);
-    if (reschedId !== null) {
-      // If it's an update, replace the existing appointment with the updated one
-      const updatedAppointments = appointments.map(appointment =>
-        appointment.id === parseInt(formData.id, 10) ? newAppointment : appointment
-      );
-      setAppointments(updatedAppointments);
-    } else {
-      // If it's a new appointment, add it to the list
-      setAppointments([...appointments, newAppointment]);
-    }
-    setAppointmentCard(newAppointment.id);
-    handleClose();
-  };
-
-  const selectedVeterinary = veterinaries.find(vet => vet.id === parseInt(formData.veterinaryId, 10));
+  const selectedVeterinary = veterinaries.find((vet: Veterinary) => vet.id === parseInt(formData.veterinaryId, 10));
 
   return (
     <Modal show={open} onHide={handleClose} size="lg">
@@ -225,7 +178,7 @@ const AppointmentModal = () => {
           {/* Select Veterinary */}
           <Form.Group controlId="veterinaryId">
             <Form.Label>Veterinary</Form.Label>
-            <Form.Select name="veterinaryId" value={formData.veterinaryId} onChange={handleChange}>
+            <Form.Select name="veterinaryId" value={formData.veterinaryId} onChange={handleSelectChange}>
               <option value="">Select Veterinary</option>
               {veterinaries.map((vet: Veterinary) => (
                 <option key={vet.id} value={vet.id}>{vet.veterinary_name}</option>
@@ -288,7 +241,7 @@ const AppointmentModal = () => {
                 placeholder="Age"
                 value={formData.ageValue}
               />
-              <Form.Select name="ageUnit" value={formData.ageUnit} onChange={handleChange}>
+              <Form.Select name="ageUnit" value={formData.ageUnit} onChange={handleSelectChange}>
                 <option value="days">Days</option>
                 <option value="months">Months</option>
                 <option value="weeks">Weeks</option>
@@ -306,7 +259,7 @@ const AppointmentModal = () => {
           {/* Gender */}
           <Form.Group controlId="gender">
             <Form.Label>Gender</Form.Label>
-            <Form.Select name="gender" value={formData.gender} onChange={handleChange}>
+            <Form.Select name="gender" value={formData.gender} onChange={handleSelectChange}>
               <option value="">Select Gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -325,22 +278,27 @@ const AppointmentModal = () => {
             <Form.Control type="text" name="ownerName" value={formData.ownerName} onChange={handleChange} />
           </Form.Group>
 
-          {/* Appointment Date */}
-          <Form.Group controlId="appointmentDate">
-            <Form.Label>Appointment Date</Form.Label>
-            <Form.Control type="date" name="appointmentDate" value={formData.appointmentDate} onChange={handleChange} />
+          {/* Appointment Date and Time */}
+          <Form.Group controlId="appointmentDateTime">
+            <Form.Label>Appointment Date and Time</Form.Label>
+            <Form.Control 
+              type="datetime-local" 
+              name="appointmentDateTime" 
+              value={formData.appointmentDateTime} 
+              onChange={handleChange} 
+            />
           </Form.Group>
 
-          {/* Appointment Start Time */}
-          <Form.Group controlId="appointmentStartTime">
-            <Form.Label>Appointment Start Time</Form.Label>
-            <Form.Control type="time" name="appointmentStartTime" value={formData.appointmentStartTime} onChange={handleChange} />
-          </Form.Group>
-
-          {/* Appointment End Time */}
-          <Form.Group controlId="appointmentEndTime">
-            <Form.Label>Appointment End Time</Form.Label>
-            <Form.Control type="time" name="appointmentEndTime" value={formData.appointmentEndTime} onChange={handleChange} />
+          {/* Duration */}
+          <Form.Group controlId="duration">
+            <Form.Label>Duration (minutes)</Form.Label>
+            <Form.Control 
+              type="number" 
+              name="duration" 
+              value={formData.duration} 
+              onChange={handleChange} 
+              min="30"
+            />
           </Form.Group>
 
           <div className='d-flex justify-content-end mt-2 gap-1'>
@@ -355,8 +313,3 @@ const AppointmentModal = () => {
 };
 
 export default AppointmentModal;
-
-
-              
-
-

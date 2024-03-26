@@ -7,9 +7,10 @@ import AppointmentModal from './AppointmentModal';
 import { useStore } from '../../../store';
 import FullCalendar from '@fullcalendar/react'
 import Image from "next/image";
+import { Appointment } from '../../../types';
 
-const CalendarSection = () => {
-  const calendarRef = useRef(null)
+const CalendarSection: React.FC = () => {
+  const calendarRef = useRef<FullCalendar>(null)
   const [calendarApi, setCalendarApi] = useState(null);
   const { open, setModal, eventId, setAppointmentCard, appointments, openSidebar } = useStore();
   const [leftNavState, setLeftNavState] = useState('default');
@@ -27,7 +28,7 @@ const CalendarSection = () => {
     }
   }, [calendarRef.current, eventId, openSidebar]);
 
-  const mapAppointmentsToEvents = (appointments) => {
+  const mapAppointmentsToEvents = (appointments: Appointment[]) => {
     return appointments.map(appointment => ({
       title: `${appointment.owner.name}~${appointment.service}`,
       start: appointment.start,
@@ -38,48 +39,6 @@ const CalendarSection = () => {
   };
 
   const isTimeLineView = view === 'timeGridDay'
-
-  const renderEventContent = (eventInfo) => {
-    const titleSegment = eventInfo.event.title.split('~');
-    const appointmentName = titleSegment[1].toLowerCase();
-    const formattedAppointmentName = appointmentName.charAt(0).toUpperCase() + appointmentName.slice(1); // Uppercase first letter
-    const appointmentee = titleSegment[0];
-
-    const startTime = new Date(eventInfo.event.start);
-    const endTime = new Date(eventInfo.event.end);
-  
-    const formattedStartTime = formatTime(startTime);
-    const formattedEndTime = formatTime(endTime);
-  
-    const practicalKeywords = ['groom', 'vac', 'check', 'surgery', 'procedure', 'treatment', 'dressing', 'therapy'];
-    const isPractical = practicalKeywords.some(keyword => appointmentName.includes(keyword));
-  
-    return (
-      <div className="d-flex p-3 justify-content-between" style={{ border: `2px solid ${isPractical ? '#FF9447' : '#9747FF'}`, borderRadius: 12, background: isPractical ? "#FFE0CE" : "#e1d7fd" }}>
-        {isTimeLineView ? (
-          <>
-            <div className='d-flex gap-2'>
-              <Image width={0} height={0} style={{ height: 26, width: 26 }} alt="Event Icon" src={`/assets/svg/${isPractical ? 'ic_park-outline_injection' : 'ic_consultation'}.svg`} />
-              <div>
-                <p style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>{formattedAppointmentName}</p>
-                <p style={{ fontSize: 12, color: '#1C1C1E' }} >{formattedStartTime} - {formattedEndTime}</p>
-                <div className='d-flex gap-1 pt-1'>
-                  <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src={`/assets/svg/ic_${isPractical ? 'technical' : 'consultation'}_user.svg`} />
-                  <p style={{ fontSize: 12, color: '#1C1C1E' }}>{appointmentee}</p>
-                </div>
-              </div>
-            </div>
-            <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src="/assets/svg/ic_dots-vertical_events.svg" />
-          </>
-        ) : (
-          <div className='d-flex align-items-center gap-1'>
-            <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="Event Icon" src={`/assets/svg/${isPractical ? 'ic_park-outline_injection' : 'ic_consultation'}.svg`} />
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>{formattedAppointmentName}</p>
-          </div>
-        )}
-      </div>
-    );
-  };  
   
   const formatTime = (time) => {
     let hours = time.getHours();
@@ -150,10 +109,51 @@ const CalendarSection = () => {
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const dayOfWeekIndex = currentDate.getDay();
   const dayOfWeek = daysOfWeek[dayOfWeekIndex];
-
    
   const leftNavIconSrc = `/assets/svg/nav_icon_left_${leftNavState}.svg`;
   const rightNavIconSrc = `/assets/svg/nav_icon_right_${rightNavState}.svg`;
+
+  const renderEventContent = (eventInfo: any) => {
+    const titleSegment = eventInfo.event.title.split('~');
+    const appointmentName = titleSegment[1].toLowerCase();
+    const formattedAppointmentName = appointmentName.charAt(0).toUpperCase() + appointmentName.slice(1); // Uppercase first letter
+    const appointmentee = titleSegment[0];
+
+    const startTime = new Date(eventInfo.event.start);
+    const endTime = new Date(eventInfo.event.end);
+  
+    const formattedStartTime = formatTime(startTime);
+    const formattedEndTime = formatTime(endTime);
+  
+    const practicalKeywords = ['groom', 'vac', 'check', 'surgery', 'procedure', 'treatment', 'dressing', 'therapy'];
+    const isPractical = practicalKeywords.some(keyword => appointmentName.includes(keyword));
+  
+    return (
+      <>
+        { isTimeLineView ? (
+          <div className="d-flex p-3 justify-content-between" style={{ border: `2px solid ${isPractical ? '#FF9447' : '#9747FF'}`, borderRadius: 12, background: isPractical ? "#FFE0CE" : "#e1d7fd" }}>
+            <div className='d-flex gap-2'>
+              <Image width={0} height={0} style={{ height: 26, width: 26 }} alt="Event Icon" src={`/assets/svg/${isPractical ? 'ic_park-outline_injection' : 'ic_consultation'}.svg`} />
+              <div>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>{formattedAppointmentName}</p>
+                <p style={{ fontSize: 12, color: '#1C1C1E' }} >{formattedStartTime} - {formattedEndTime}</p>
+                <div className='d-flex gap-1 pt-1'>
+                  <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src={`/assets/svg/ic_${isPractical ? 'technical' : 'consultation'}_user.svg`} />
+                  <p style={{ fontSize: 12, color: '#1C1C1E' }}>{appointmentee}</p>
+                </div>
+              </div>
+            </div>
+            <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src="/assets/svg/ic_dots-vertical_events.svg" />
+          </div>
+        ) : (
+          <div className='d-flex align-items-center gap-1' style={{ maxWidth: '90%' }}> {/* Adjust maxWidth as needed */}
+            <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="Event Icon" src={`/assets/svg/${isPractical ? 'ic_park-outline_injection' : 'ic_consultation'}.svg`} />
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 'calc(100% - 16px)' }}>{formattedAppointmentName}</p> {/* Adjust maxWidth to allow space for the icon */}
+          </div>
+        )}
+      </>
+    );
+  };
 
   return (
     <div className='ps-2 pe-3'>
@@ -202,6 +202,14 @@ const CalendarSection = () => {
         </div>
       </div>
       <div className='ms-4 me-0 pe-1' style={{ height: "67vh", overflow: "auto" }}>
+        <style>
+          {`
+            .fc-scroller {
+              overflow-y: hidden !important;
+              overflow-x: auto !important;
+            }
+          `}
+        </style>
         <FullCalendar
           ref={calendarRef}
           plugins={[ timeGridPlugin, dayGridPlugin ]}
@@ -212,15 +220,18 @@ const CalendarSection = () => {
           eventContent={renderEventContent}
           eventSources={[
             {
-              events: mapAppointmentsToEvents(appointments).filter(apt => apt.status !== 'cancelled'),
+              events: mapAppointmentsToEvents(appointments).filter((apt: Appointment) => apt.status !== 'cancelled'),
               color: 'transparent',
             },
           ]}
-          height={isTimeLineView ? '5000px' : '67vh'}
+          height={isTimeLineView ? '1350px' : '67vh'}
+          contentHeight={isTimeLineView ? '1350px' : '67vh'}
           headerToolbar={false}
           allDaySlot={false}
           slotEventOverlap={false}
           slotDuration="01:00:00"
+          slotMinTime="07:00:00"
+          slotMaxTime="20:00:00"
           expandRows={true}
         />
       </div>
