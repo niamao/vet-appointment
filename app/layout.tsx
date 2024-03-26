@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${urbanist.className} overflow-hidden`}>
+      <body className={`${urbanist.className} overflow-x-hidden`}>
         <Container fluid className="px-0 vh-100">
           <Row>
             <Col xs="auto" className="px-0 vh-100">

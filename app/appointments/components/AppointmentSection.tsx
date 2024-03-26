@@ -63,10 +63,7 @@ const AppointmentSection = () => {
     );
     setAppointments(updatedAppointments);
     setShowModal(false);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+    setAppointmentCard('')
   };
 
   useEffect(() => {

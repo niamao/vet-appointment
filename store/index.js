@@ -22,6 +22,11 @@ export const useStore = create((set) => {
       setModal: (open) => set({ open })
     }
 
+    const sidebar = {
+      openSidebar: true,
+      setSidbar: (openSidebar) => set({ openSidebar })
+    }
+
     const resched = {
       reschedId: null,
       setResched: (reschedId) => set({ reschedId })
@@ -32,6 +37,7 @@ export const useStore = create((set) => {
         ...appointments,
         ...appoinmentCardState,
         ...modal,
-        ...resched
+        ...resched,
+        ...sidebar
     }
 });

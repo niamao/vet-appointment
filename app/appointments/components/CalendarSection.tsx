@@ -11,15 +11,21 @@ import Image from "next/image";
 const CalendarSection = () => {
   const calendarRef = useRef(null)
   const [calendarApi, setCalendarApi] = useState(null);
-  const { open, setModal, eventId, setAppointmentCard, appointments } = useStore();
+  const { open, setModal, eventId, setAppointmentCard, appointments, openSidebar } = useStore();
   const [leftNavState, setLeftNavState] = useState('default');
   const [rightNavState, setRightNavState] = useState('default');
+  const [view, setView] = useState('timeGridDay')
 
   useEffect(() => {
     if (calendarRef.current) {
-      setCalendarApi(calendarRef.current.getApi());
+      const api = calendarRef.current.getApi();
+      setCalendarApi(api);
+      api.changeView(view)
+      setTimeout(() => {
+        api.updateSize();
+      }, 500);
     }
-  }, [calendarRef.current]);
+  }, [calendarRef.current, eventId, openSidebar]);
 
   const mapAppointmentsToEvents = (appointments) => {
     return appointments.map(appointment => ({
@@ -30,6 +36,8 @@ const CalendarSection = () => {
       status: appointment.status,
     }));
   };
+
+  const isTimeLineView = view === 'timeGridDay'
 
   const renderEventContent = (eventInfo) => {
     const titleSegment = eventInfo.event.title.split('~');
@@ -48,18 +56,27 @@ const CalendarSection = () => {
   
     return (
       <div className="d-flex p-3 justify-content-between" style={{ border: `2px solid ${isPractical ? '#FF9447' : '#9747FF'}`, borderRadius: 12, background: isPractical ? "#FFE0CE" : "#e1d7fd" }}>
-        <div className='d-flex gap-2'>
-          <Image width={0} height={0} style={{ height: 26, width: 26 }} alt="Event Icon" src={`/assets/svg/${isPractical ? 'ic_park-outline_injection' : 'ic_consultation'}.svg`} />
-          <div>
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>{formattedAppointmentName}</p>
-            <p style={{ fontSize: 12, color: '#1C1C1E' }} >{formattedStartTime} - {formattedEndTime}</p>
-            <div className='d-flex gap-1 pt-1'>
-              <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src={`/assets/svg/ic_${isPractical ? 'technical' : 'consultation'}_user.svg`} />
-              <p style={{ fontSize: 12, color: '#1C1C1E' }}>{appointmentee}</p>
+        {isTimeLineView ? (
+          <>
+            <div className='d-flex gap-2'>
+              <Image width={0} height={0} style={{ height: 26, width: 26 }} alt="Event Icon" src={`/assets/svg/${isPractical ? 'ic_park-outline_injection' : 'ic_consultation'}.svg`} />
+              <div>
+                <p style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>{formattedAppointmentName}</p>
+                <p style={{ fontSize: 12, color: '#1C1C1E' }} >{formattedStartTime} - {formattedEndTime}</p>
+                <div className='d-flex gap-1 pt-1'>
+                  <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src={`/assets/svg/ic_${isPractical ? 'technical' : 'consultation'}_user.svg`} />
+                  <p style={{ fontSize: 12, color: '#1C1C1E' }}>{appointmentee}</p>
+                </div>
+              </div>
             </div>
+            <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src="/assets/svg/ic_dots-vertical_events.svg" />
+          </>
+        ) : (
+          <div className='d-flex align-items-center gap-1'>
+            <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="Event Icon" src={`/assets/svg/${isPractical ? 'ic_park-outline_injection' : 'ic_consultation'}.svg`} />
+            <p style={{ fontSize: 16, fontWeight: 700, color: '#1C1C1E' }}>{formattedAppointmentName}</p>
           </div>
-        </div>
-        <Image width={0} height={0} style={{ height: 16, width: 16 }} alt="User Event Icon" src="/assets/svg/ic_dots-vertical_events.svg" />
+        )}
       </div>
     );
   };  
@@ -109,6 +126,7 @@ const CalendarSection = () => {
   const changeToDayGridMonth = () => {
     if (calendarApi) {
       calendarApi.changeView('dayGridMonth');
+      setView('dayGridMonth')
     }
   };
 
@@ -116,6 +134,7 @@ const CalendarSection = () => {
     if (calendarApi) {
       calendarApi.today(); 
       calendarApi.changeView('timeGridDay'); 
+      setView('timeGridDay')
     }
   };
 
@@ -182,7 +201,7 @@ const CalendarSection = () => {
           </button>
         </div>
       </div>
-      <div className='ms-4 me-0 pe-1'>
+      <div className='ms-4 me-0 pe-1' style={{ height: "67vh", overflow: "auto" }}>
         <FullCalendar
           ref={calendarRef}
           plugins={[ timeGridPlugin, dayGridPlugin ]}
@@ -197,10 +216,12 @@ const CalendarSection = () => {
               color: 'transparent',
             },
           ]}
-          height="70vh"
-          contentHeight="70vh"
+          height={isTimeLineView ? '5000px' : '67vh'}
           headerToolbar={false}
           allDaySlot={false}
+          slotEventOverlap={false}
+          slotDuration="01:00:00"
+          expandRows={true}
         />
       </div>
       <AppointmentModal /> 
